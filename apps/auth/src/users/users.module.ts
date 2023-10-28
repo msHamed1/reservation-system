@@ -16,6 +16,7 @@ import { LoggerModule } from '@app/common';
   ],
   controllers: [
     UsersController],
-  providers: [UsersService,UserRepository]
+  providers: [UsersService,UserRepository],
+  exports:[UsersService]
 })
 export class UsersModule {}
