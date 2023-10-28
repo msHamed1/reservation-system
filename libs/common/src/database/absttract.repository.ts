@@ -1,6 +1,6 @@
 import { Model, Types, UpdateQuery, _FilterQuery } from 'mongoose';
 import { AbstractDocument } from './abstract.schema';
-import { Logger, NotFoundException } from '@nestjs/common';
+import { InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 
 export abstract class AbstractRepositiry<TDocument extends AbstractDocument> {
   protected abstract readonly logger: Logger;
@@ -12,6 +12,7 @@ export abstract class AbstractRepositiry<TDocument extends AbstractDocument> {
       ...document,
       _id: new Types.ObjectId(),
     });
+  
     return (await newDocument.save()).toJSON() as unknown as TDocument;
   }
 
