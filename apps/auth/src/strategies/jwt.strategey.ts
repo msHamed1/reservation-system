@@ -16,7 +16,10 @@ export class JwtStrategy extends PassportStrategy(Strategy){
     ){
         super({
             jwtFromRequest:ExtractJwt.fromExtractors([
-                (_:Request)=>_?.cookies?.Authentication
+                (_:any)=>{ 
+                    return _?.cookies?.Authentication // from noraml http will check for the cookie
+                || _?.Authentication // From RPC there is no cookie 
+            }
             ]),
             secretOrKey:configService.get('SECRET_KEY')
         })

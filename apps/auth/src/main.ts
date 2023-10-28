@@ -3,9 +3,11 @@ import { AuthModule } from './auth.module';
 import { ValidationPipe } from '@nestjs/common';
 import { Logger } from 'nestjs-pino';
 import * as Cookie from 'cookie-parser'
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
+
+  // this an hybird app one on port 3001 listen to HTTP requests and act as microservices on port 3002
   const app = await NestFactory.create(AuthModule);
   app.connectMicroservice({
     transport: Transport.TCP,

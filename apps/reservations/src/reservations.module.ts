@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { ReservationsController } from './reservations.controller';
-import { DatabaseModule, LoggerModule } from '@app/common';
+import { DatabaseModule, AUTH_service, LoggerModule } from '@app/common';
 import { ReservationRepository } from './reservation.repository';
 import { ReservationDocument, ReservationSchema } from './models/reservation.schema';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from "joi"
+import { ClientsModule, Transport } from '@nestjs/microservices';
+
 
 @Module({
   imports:[ConfigModule.forRoot({
@@ -16,9 +18,16 @@ import * as Joi from "joi"
     })
     }),DatabaseModule,DatabaseModule.forFeature([{name:ReservationDocument.name,schema:ReservationSchema}]),
   LoggerModule,
+  ClientsModule.register([
+    {name:AUTH_service,transport:Transport.TCP, options:{
+      host:'0.0.0.0',
+      port:3002
+    }}
+  ])
   
 ],
   controllers: [ReservationsController],
   providers: [ReservationsService,ReservationRepository],
+  
 })
 export class ReservationsModule {}
