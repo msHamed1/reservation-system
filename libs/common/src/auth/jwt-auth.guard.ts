@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Inject, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Inject, Injectable, InternalServerErrorException, UnauthorizedException } from "@nestjs/common";
 import { Observable, map, tap } from "rxjs";
 import { AUTH_service } from "../constants/services";
 import { ClientProxy } from "@nestjs/microservices";
@@ -11,27 +11,26 @@ export class JwtAuthGuard implements CanActivate{
 
     // this guard will be sitting in front of any public facing  api route that need to verify the token 
     // it will expect to pass a jwt in side http cookie inorder to authenticate the user
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-       
-        // cookie parser lib will parse the cookie to the request , so any app will use this Guard should have the cookie parser middlware 
+    async canActivate(context: ExecutionContext): Promise<any> {
         const jwt = context.switchToHttp().getRequest().cookies?.Authentication ||
-        context.switchToHttp().getRequest().headers?.authentication;
-  
-        if(!jwt) return false;
+            context.switchToHttp().getRequest().headers?.authentication;
 
-        return this.acuthClient.send<UserDto>('authenticate',{
-            Authentication:jwt
-        }).pipe(
-            tap((res)=>{
-                context.switchToHttp().getRequest().user = res
-            }),
-            map(()=>  true )
-        )
+        if (!jwt) {
+            throw new UnauthorizedException('JWT not provided');
+        }
 
+        try {
+            const user = await this.acuthClient.send<UserDto>('authenticate', { Authentication: jwt }).toPromise();
 
-
-
-
+            if (user) {
+                context.switchToHttp().getRequest().user = user;
+                return true;
+            } else {
+                throw new UnauthorizedException('Invalid JWT');
+            }
+        } catch (error) {
+            // Handle the error here, you can log it for debugging or return an error response.
+            throw new InternalServerErrorException('Authentication failed', error.message);
+        }
     }
-
 }
