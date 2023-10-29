@@ -3,34 +3,35 @@ import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationRepository } from './reservation.repository';
 import { timeStamp } from 'console';
+import { UserDto } from '@app/common';
 
 @Injectable()
 export class ReservationsService {
 
   constructor(private readonly _reservationReposotory:ReservationRepository){}
-  create(createReservationDto: CreateReservationDto) {
-    return this._reservationReposotory.create(
+   async create(createReservationDto: CreateReservationDto ,user:UserDto) {
+    return await this._reservationReposotory.create(
       {...createReservationDto,
       timeStamp:new Date(),
-      userId:"1234"}
+      userId:user._id}
     );
   }
 
-  findAll() {
-    return this._reservationReposotory.find({})
+  async findAll() {
+    return  await this._reservationReposotory.find({})
   }
 
-  findOne(id: string) {
-    return this._reservationReposotory.findOne({_id:id})
+  async  findOne(id: string) {
+    return await this._reservationReposotory.findOne({_id:id})
   }
 
-  update(id: string, updateReservationDto: UpdateReservationDto) {
-    return this._reservationReposotory.findOrUpdate({_id:id},{
+  async update(id: string, updateReservationDto: UpdateReservationDto) {
+    return  await this._reservationReposotory.findOrUpdate({_id:id},{
       $set: updateReservationDto
     })
   }
 
-  remove(id: string) {
-    return this._reservationReposotory.findOneAndDelete({_id:id})
+  async remove(id: string) {
+    return await this._reservationReposotory.findOneAndDelete({_id:id})
   }
 }
