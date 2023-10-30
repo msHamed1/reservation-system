@@ -1,20 +1,38 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationDto } from './dto/update-reservation.dto';
 import { ReservationRepository } from './reservation.repository';
 import { timeStamp } from 'console';
-import { UserDto } from '@app/common';
+import { PAYMENT_SERVICE, UserDto } from '@app/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { catchError, map } from 'rxjs';
 
 @Injectable()
 export class ReservationsService {
 
-  constructor(private readonly _reservationReposotory:ReservationRepository){}
+  constructor(private readonly _reservationReposotory:ReservationRepository ,
+    @Inject(PAYMENT_SERVICE) private readonly _paymentClient:ClientProxy){}
    async create(createReservationDto: CreateReservationDto ,user:UserDto) {
-    return await this._reservationReposotory.create(
-      {...createReservationDto,
-      timeStamp:new Date(),
-      userId:user._id}
-    );
+
+    return this._paymentClient.send('create_charge',{
+      ...createReservationDto.charge,
+      email:user.email
+    })
+    .pipe(
+      map(async (res)=>{
+        return await this._reservationReposotory.create(
+          {...createReservationDto,
+          invoiceId:res.id,
+          timeStamp:new Date(),
+          userId:user._id}
+        );
+      }),
+      catchError((er)=>{
+      
+       throw new InternalServerErrorException("Error with Payment service please try again")
+      })
+    )
+  
   }
 
   async findAll() {
