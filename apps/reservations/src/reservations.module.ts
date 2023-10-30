@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { ReservationsController } from './reservations.controller';
-import { DatabaseModule, AUTH_service, LoggerModule } from '@app/common';
+import { DatabaseModule, AUTH_service, LoggerModule, PAYMENT_SERVICE } from '@app/common';
 import { ReservationRepository } from './reservation.repository';
 import { ReservationDocument, ReservationSchema } from './models/reservation.schema';
 import { ConfigModule } from '@nestjs/config';
@@ -22,7 +22,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     {name:AUTH_service,transport:Transport.TCP, options:{
       host:'0.0.0.0',
       port:3002
-    }}
+    }},
+    {
+      name:PAYMENT_SERVICE,transport:Transport.TCP,options:{
+         host:"0.0.0.0",
+         port:3004
+      }
+    }
   ])
   
 ],

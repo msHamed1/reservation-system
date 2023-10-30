@@ -3,7 +3,8 @@ import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi'
-import { LoggerModule } from '@app/common';
+import { LoggerModule, NOTIFICATION_SERVICE } from '@app/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -14,7 +15,13 @@ import { LoggerModule } from '@app/common';
         STRIPE_SECRET_KEY: Joi.string().required(),
     })
     }),
-    LoggerModule
+    LoggerModule,
+    ClientsModule.register([{
+      name:NOTIFICATION_SERVICE,transport:Transport.TCP,options:{
+        host:'0.0.0.0',
+        port:3005
+      }
+    }])
   ],
   controllers: [PaymentsController],
   providers: [PaymentsService],
