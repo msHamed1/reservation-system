@@ -3,4 +3,5 @@ export interface UserDto {
     email   :string;
     password:string;
     user_name:string;
+    roles?:string[]
 }

@@ -1,4 +1,4 @@
-import {  IsEmail, IsString, IsStrongPassword } from "class-validator";
+import {  ArrayNotEmpty, IsAlpha, IsArray, IsEmail, IsOptional, IsString, IsStrongPassword, isNotEmpty } from "class-validator";
 
 export  class CreateUserDto {
 
@@ -8,6 +8,10 @@ export  class CreateUserDto {
         password        :string ;
         @IsString()
         user_name       :string;
+        @IsOptional()
+        @IsArray()
+        @IsString({each:true})
+        roles?:string[]
     
 
 }
